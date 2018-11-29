@@ -127,7 +127,14 @@ public abstract class Condition {
    * @param expectedAttributeValue expected value of attribute
    */
   public static Condition attribute(final String attributeName, final String expectedAttributeValue) {
-    return new Condition("attribute") {
+    return new ConditionWithDescription("attribute") {
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Have " + attributeName + ":" +
+          "\n\tExpected: '%s'" +
+          "\n\t  Actual: '%s'", expectedAttributeValue, getAttributeValue(element, attributeName));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return expectedAttributeValue.equals(getAttributeValue(element, attributeName));
@@ -154,7 +161,15 @@ public abstract class Condition {
    * @param expectedValue expected value of "value" attribute
    */
   public static Condition value(final String expectedValue) {
-    return new Condition("value") {
+    return new ConditionWithDescription("value") {
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Have value (Case Insensitive, Normalize Spaces):" +
+            "\n\tExpected: '%s'" +
+            "\n\t  Actual: '%s'", Html.text.reduceSpaces(expectedValue).toLowerCase(),
+          Html.text.reduceSpaces(getAttributeValue(element, "value")));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return Html.text.contains(getAttributeValue(element, "value"), expectedValue);
@@ -229,7 +244,15 @@ public abstract class Condition {
    * @param regex e.g. Kicked.*Chuck Norris - in this case ".*" can contain any characters including spaces, tabs, CR etc.
    */
   public static Condition matchText(final String regex) {
-    return new Condition("match text") {
+    return new ConditionWithDescription("match text") {
+
+      @Override
+      public String matchDescription(WebElement element) {    
+        return String.format("Match Regex:" +
+          "\n\tRegex: '%s'" +
+          "\n\tFound: '%s'", regex, element.getText());
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return Html.text.matches(element.getText(), regex);
@@ -263,7 +286,15 @@ public abstract class Condition {
    * @param text expected text of HTML element
    */
   public static Condition textCaseSensitive(final String text) {
-    return new Condition("textCaseSensitive") {
+    return new ConditionWithDescription("textCaseSensitive") {
+
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Contain Text (Case Sensitive, Spaces Normalized):" +
+          "\n\tExpected: '%s'" +
+          "\n\t  Actual: '%s'", Html.text.reduceSpaces(text), Html.text.reduceSpaces(element.getText()));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return Html.text.containsCaseSensitive(element.getText(), text);
@@ -285,7 +316,16 @@ public abstract class Condition {
    * @param text expected text of HTML element
    */
   public static Condition exactText(final String text) {
-    return new Condition("exact text") {
+    return new ConditionWithDescription("exact text") {
+
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Match Text (Case Insensitive, Spaces Normalized):" +
+            "\n\tExpected: '%s'" +
+            "\n\t  Actual: '%s'", Html.text.reduceSpaces(text.toLowerCase()),
+          Html.text.reduceSpaces(element.getText().toLowerCase()));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return Html.text.equals(element.getText(), text);
@@ -306,7 +346,15 @@ public abstract class Condition {
    * @param text expected text of HTML element
    */
   public static Condition exactTextCaseSensitive(final String text) {
-    return new Condition("exact text case sensitive") {
+    return new ConditionWithDescription("exact text case sensitive") {
+
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Match Text (Case Sensitive, Spaces Normalized):" +
+          "\n\tExpected: '%s'" +
+          "\n\t  Actual: '%s'", Html.text.reduceSpaces(text), Html.text.reduceSpaces(element.getText()));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         return Html.text.equalsCaseSensitive(element.getText(), text);
@@ -332,7 +380,15 @@ public abstract class Condition {
    * <p>Sample: <code>$("input").shouldHave(cssClass("active"));</code></p>
    */
   public static Condition cssClass(final String cssClass) {
-    return new Condition("css class") {
+    return new ConditionWithDescription("css class") {
+
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Have Css Class:" +
+          "\n\t  Class: '%s'" +
+          "\n\t  Found: '%s'", cssClass, element.getAttribute("class"));
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         String classes = element.getAttribute("class");
@@ -366,7 +422,15 @@ public abstract class Condition {
    * @see WebElement#getCssValue
    */
   public static Condition cssValue(final String propertyName, final String expectedValue) {
-    return new Condition("cssValue") {
+    return new ConditionWithDescription("cssValue") {
+
+      @Override
+      public String matchDescription(WebElement element) {
+        return String.format("Have '" + propertyName + "' Css Value (Case Insensitive):" +
+          "\n\tExpected: '%s'" +
+          "\n\t  Actual: '%s'", defaultString(expectedValue).toLowerCase(), defaultString(element.getCssValue(propertyName)).toLowerCase());
+      }
+
       @Override
       public boolean apply(Driver driver, WebElement element) {
         String actualValue = element.getCssValue(propertyName);

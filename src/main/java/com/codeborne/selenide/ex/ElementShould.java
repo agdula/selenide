@@ -1,6 +1,7 @@
 package com.codeborne.selenide.ex;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.ConditionWithDescription;
 import com.codeborne.selenide.Driver;
 import com.codeborne.selenide.impl.Describe;
 import org.openqa.selenium.WebElement;
@@ -16,7 +17,9 @@ public class ElementShould extends UIAssertionError {
   public ElementShould(Driver driver, String searchCriteria, String prefix, String message, Condition expectedCondition,
                        WebElement element, Throwable lastError) {
     super(driver,
-      "Element should " + prefix + expectedCondition + " {" + searchCriteria + "}" +
+      (expectedCondition instanceof ConditionWithDescription ?
+        ("\nShould " + ((ConditionWithDescription) expectedCondition).matchDescription(element) + "\n\n") : "") +
+        "Element should " + prefix + expectedCondition + " {" + searchCriteria + "}" +
         (message != null ? " because " + message : "") +
         "\nElement: '" + Describe.describe(driver, element) + '\'' +
         actualValue(expectedCondition, driver, element), lastError);
